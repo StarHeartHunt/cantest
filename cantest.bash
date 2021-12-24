@@ -6,8 +6,19 @@ Show_Stat() {
   RXPacketsLoss=$(ifconfig can0|awk '/RX.* dropped ([0-9])/' | awk '{print $3}')
   TXPacketsLoss=$(ifconfig can0|awk '/TX.* dropped ([0-9])/' | awk '{print $3}')
 
-  RXPacketsLossRate=$(( 100 * RXPacketsLoss / RXPacketsSum + (1000 * RXPacketsLoss / RXPacketsSum % 10 >= 5 ? 1 : 0) ))
-  TXPacketsLossRate=$(( 100 * TXPacketsLoss / TXPacketsSum + (1000 * TXPacketsLoss / TXPacketsSum % 10 >= 5 ? 1 : 0) ))
+  if [ $RXPacketsSum == 0 ]
+  then
+    RXPacketsLossRate=0
+  else
+    RXPacketsLossRate=$(( 100 * RXPacketsLoss / RXPacketsSum + (1000 * RXPacketsLoss / RXPacketsSum % 10 >= 5 ? 1 : 0) ))
+  fi
+    
+  if [ $TXPacketsSum == 0 ]
+  then
+    TXPacketsLossRate=0
+  else
+    TXPacketsLossRate=$(( 100 * TXPacketsLoss / TXPacketsSum + (1000 * TXPacketsLoss / TXPacketsSum % 10 >= 5 ? 1 : 0) ))
+  fi
   
   echo "CAN device $1 test report:"
   echo "  RX packets loss/sum: ${RXPacketsLoss}/${RXPacketsSum}=${RXPacketsLossRate}%"
