@@ -25,7 +25,7 @@ Show_Stat() {
   echo "  TX packets loss/sum: ${TXPacketsLoss}/${TXPacketsSum}=${TXPacketsLossRate}%"
   #printf "\n\n====== Detailed Information ======\n"
   #ifconfig $1
-  exit 0
+  #exit 0
 }
 
 Show_Help() {
@@ -33,7 +33,11 @@ Show_Help() {
 }
 
 Send_CAN() {
-  cangen $1
+  if [[ -z "$2" ]] ; then
+    cangen $1
+  else
+    cangen $1 -g $2
+  fi
 }
 
 if [[ $# -eq 0 ]] ; then
@@ -47,14 +51,24 @@ case $1 in
     echo "Missing can_device!"
     exit 1
   fi
-  Show_Stat $2
+  while :
+  do
+    Show_Stat $2
+    sleep 0.2
+    tput cuu1 # move cursor up by one line
+    tput el # clear the line
+    tput cuu1
+    tput el
+    tput cuu1
+    tput el
+  done
   ;;
 "send")
   if [[ -z "$2" ]] ; then
     echo "Missing can_device!"
     exit 1
   fi
-  Send_CAN $2
+  Send_CAN $2 $3
   ;;
 *)
   echo "Command not found, choices: [send, stat]"
