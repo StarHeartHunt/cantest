@@ -70,6 +70,17 @@ case $1 in
   fi
   Send_CAN $2 $3
   ;;
+"start")
+  if [[ -z "$2" ]] ; then
+    echo "Missing can_device!"
+    exit 1
+  fi
+  if [[ -z "$3" ]] ; then
+    cansend $2 $3
+  else
+    cansend $2 1ff#0bb80bb80bb80bb8
+    cansend $2 200#0bb80bb80bb80bb8
+  fi
 *)
   echo "Command not found, choices: [send, stat]"
   exit 1
