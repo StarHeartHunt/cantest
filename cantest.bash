@@ -76,11 +76,12 @@ case $1 in
     exit 1
   fi
   if [[ -z "$3" ]] ; then
-    cansend $2 $3
-  else
     cansend $2 1ff#0bb80bb80bb80bb8
     cansend $2 200#0bb80bb80bb80bb8
+  else
+    cansend $2 $3
   fi
+  ;;
 *)
   echo "Command not found, choices: [send, stat]"
   exit 1
