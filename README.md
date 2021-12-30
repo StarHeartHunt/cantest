@@ -11,7 +11,7 @@ sudo ip link set can1 up type can bitrate 1000000
 ./cantest.bash send can1
 ```
 
-Then open **another** terminal, run:
+Then launch **another** terminal, run:
 ```
 ./cantest.bash stat can0
 ```
