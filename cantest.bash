@@ -2,27 +2,17 @@
 
 Show_Stat() {
   RXPacketsSum=$(ifconfig can0|awk '/RX.* packets ([0-9])/' | awk '{print $3}')
-  TXPacketsSum=$(ifconfig can0|awk '/TX.* packets ([0-9])/' | awk '{print $3}')
   RXPacketsLoss=$(ifconfig can0|awk '/RX.* dropped ([0-9])/' | awk '{print $3}')
-  TXPacketsLoss=$(ifconfig can0|awk '/TX.* dropped ([0-9])/' | awk '{print $3}')
+  TXPacketsSum=$(ifconfig can1|awk '/TX.* packets ([0-9])/' | awk '{print $3}')
+  TXPacketsLoss=$(ifconfig can1|awk '/TX.* dropped ([0-9])/' | awk '{print $3}')
 
-  if [ $RXPacketsSum == 0 ]
-  then
-    RXPacketsLossRate=0
-  else
-    RXPacketsLossRate=$(( 100 * RXPacketsLoss / RXPacketsSum + (1000 * RXPacketsLoss / RXPacketsSum % 10 >= 5 ? 1 : 0) ))
-  fi
-    
-  if [ $TXPacketsSum == 0 ]
-  then
-    TXPacketsLossRate=0
-  else
-    TXPacketsLossRate=$(( 100 * TXPacketsLoss / TXPacketsSum + (1000 * TXPacketsLoss / TXPacketsSum % 10 >= 5 ? 1 : 0) ))
-  fi
+  PacketLossRate=$(awk -vrxs=$RXPacketsSum -vrxl=$RXPacketsLoss -vtxs=$TXPacketsSum -vtxl=$TXPacketsLoss 'BEGIN{printf("%.2f%%\n",100-(rxs/txs*100))}')
+  #PacketReceiveRate=$(awk -vrxs=$RXPacketsSum -vrxl=$RXPacketsLoss -vtxs=$TXPacketsSum -vtxl=$TXPacketsLoss 'BEGIN{printf("%.2f%%\n",rxs/txs*100)}')
   
   echo "CAN device $1 test report:"
-  echo "  RX packets loss/sum: ${RXPacketsLoss}/${RXPacketsSum}=${RXPacketsLossRate}%"
-  echo "  TX packets loss/sum: ${TXPacketsLoss}/${TXPacketsSum}=${TXPacketsLossRate}%"
+  echo "  Packet loss rate: ${PacketLossRate}"
+  echo "  can0 RX packets loss/sum: ${RXPacketsLoss}/${RXPacketsSum}"
+  echo "  can1 TX packets loss/sum: ${TXPacketsLoss}/${TXPacketsSum}"
   #printf "\n\n====== Detailed Information ======\n"
   #ifconfig $1
   #exit 0
@@ -61,6 +51,8 @@ case $1 in
     tput el
     tput cuu1
     tput el
+    tput cuu1
+    tput el
   done
   ;;
 "send")
@@ -76,10 +68,16 @@ case $1 in
     exit 1
   fi
   if [[ -z "$3" ]] ; then
-    cansend $2 1ff#0bb80bb80bb80bb8
-    cansend $2 200#0bb80bb80bb80bb8
+    while :
+    do
+      cansend $2 1ff#0bb80bb80bb80bb8
+      cansend $2 200#0bb80bb80bb80bb8
+    done
   else
-    cansend $2 $3
+    while :
+    do
+      cansend $2 $3
+    done
   fi
   ;;
 *)
